@@ -1,0 +1,30 @@
+name: Docker Publish
+
+on:
+  push:
+    tags:
+      - 'v*'  # Este trigger se activa al crear un tag que comienza con "v"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          TAG=${GITHUB_REF##*/}  # Obtiene el nombre del tag, por ejemplo "v3"
+          docker build -t my-app:$TAG .
+
+      - name: Push Docker image
+        run: |
+          TAG=${GITHUB_REF##*/}
+          docker push my-app:$TAG
